@@ -1,0 +1,20 @@
+
+.md-toolbar-tools h1 {
+    font-size: inherit;
+    font-weight: inherit;
+    margin: inherit;
+    color: #fff;
+}
+
+#current-color {
+    border: 1px solid #333;
+    padding: 0 12px;
+}
+
+@media (max-width: 599px) {
+    [layout-sm=column] {
+        -webkit-flex-direction: initial;
+        -ms-flex-direction: initial;
+        flex-direction: initial;
+    }
+}
