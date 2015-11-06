@@ -5,18 +5,18 @@ import (
 	"log"
 )
 
-var device = "/dev/pts/10"
+var device = "/dev/pts/9"
 
 /* Commandlist:
-	- color:(r,g,b)
-	- cmd:FADE
-	- cmd:STROBE
-	- cmd:POWER_ON
-	- cmd:POWER_OFF
-	- cmd:FLASH
- */
+- color:(r,g,b)
+- cmd:FADE
+- cmd:STROBE
+- cmd:POWER_ON
+- cmd:POWER_OFF
+- cmd:FLASH
+*/
 
-func Serve(serialInput chan string, webInput chan string, done chan bool) {
+func Serve(webWriter chan<- string, webReader <-chan string, done chan bool) {
 	log.Println("# Starting Serial Listener on", device)
 
 	c := &serial.Config{Name: device, Baud: 9600}
@@ -25,15 +25,15 @@ func Serve(serialInput chan string, webInput chan string, done chan bool) {
 		log.Fatal(err)
 	}
 
-	go readSerial(s, webInput)
-	writeSerial(s, serialInput)
+	go readSerial(s, webWriter)
+	writeSerial(s, webReader)
 	done <- true
 }
 
-func writeSerial (s *serial.Port, serialInput chan string) {
+func writeSerial(s *serial.Port, input <-chan string) {
 
 	for {
-		message := <-serialInput
+		message := <-input
 		message += "\n"
 		n, err := s.Write([]byte(message))
 		if err != nil {
@@ -43,14 +43,14 @@ func writeSerial (s *serial.Port, serialInput chan string) {
 	}
 }
 
-func readSerial(s *serial.Port, webInput chan string) {
+func readSerial(s *serial.Port, output chan<- string) {
 	buf := make([]byte, 128)
 	for {
 		n, err := s.Read(buf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		webInput <- string(buf[:n])
+		output <- string(buf[:n])
 		log.Printf("# Received Info:")
 		log.Printf("%q", buf[:n])
 	}

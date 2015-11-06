@@ -1,4 +1,4 @@
-var app = angular.module('LedServer', ['ngMaterial', 'ngWebsocket']);
+var app = angular.module('LedServer', ['ngMaterial', 'ngWebSocket']);
 
 app.config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
@@ -8,21 +8,61 @@ app.config(function($mdThemingProvider) {
 
 app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
 
-    var ws = $websocket.$new({
-        url: "ws://localhost:8081",
-        protocols: []
+    var ws = $websocket("ws://localhost:8081/");
+
+    ws.onMessage(function(message) {
+        var data = JSON.parse(message.data);
+
+        if (data.event === "cmd") {
+            handleCommand(data.data);
+        } else if (data.event === "color") {
+            handleColor(data.data);
+        }
+
     });
 
-    ws.$on('$open', function () {
-        console.log('Websocket connected');
+    function handleCommand (command) {
 
-        ws.$emit("color", [255, 255, 255]);
-        ws.$emit("cmd","FADE");
-    });
+        var valid = false;
+        var value = 0;
 
-    ws.$on('$close', function () {
-        console.log('Websocket closed');
-    });
+        if (command.slice(-2) === "ON") {
+            valid = true;
+            value = true;
+        } else if (command.slice(-3) === "OFF") {
+            valid = true;
+            value = false;
+        }
+
+        if (!valid) {
+            return;
+        }
+
+        var parts = command.split("_");
+        var option = parts[0];
+
+        if (option === "FADE") {
+            $scope.options.fade = value;
+        } else if (option === "FLASH") {
+            $scope.options.flash = value;
+        } else if (option === "STROBE") {
+            $scope.options.strobe = value;
+        }
+
+
+    }
+
+    function handleColor (colors) {
+        $scope.color.red = colors[0];
+        $scope.color.green = colors[1];
+        $scope.color.blue = colors[2];
+    }
+
+    $scope.options = {
+        fade: true,
+        flash: true,
+        strobe: true
+    };
 
     $scope.color = {
         red: 255,
@@ -34,5 +74,26 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
         'Hello',
         'Hello2',
         'Received Message'
-    ]
+    ];
+
+    $scope.sendColor = function(red, green, blue) {
+        ws.send({event:'color', data:[red, green, blue]});
+    };
+
+    $scope.sendCommand = function(command, value) {
+
+        command += "_";
+        console.log(value);
+
+        if (value === true) {
+            command += "ON";
+        } else {
+            command += "OFF";
+        }
+
+        ws.send({
+            event:'cmd',
+            data:command
+        });
+    };
 }]);

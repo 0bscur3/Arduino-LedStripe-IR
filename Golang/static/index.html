@@ -32,21 +32,21 @@
                     <div flex="10" layout layout-align="center center">
                         <span class="md-body-1">R</span>
                     </div>
-                    <md-slider flex ng-model="color.red" min="0" max="255"  aria-label="Red Slider" id="red-slider" class>
+                    <md-slider flex ng-model="color.red" ng-change="sendColor(color.red, color.green, color.blue)" min="0" max="255" aria-label="Red Slider" id="red-slider" class>
                     </md-slider>
                 </div>
                 <div layout>
                     <div flex="10" layout layout-align="center center">
                         <span class="md-body-1">G</span>
                     </div>
-                    <md-slider flex ng-model="color.green" min="0" max="255" aria-label="Green Slider" id="green-slider" class="md-accent">
+                    <md-slider flex ng-model="color.green" ng-change="sendColor(color.red, color.green, color.blue)" min="0" max="255" aria-label="Green Slider" id="green-slider" class="md-accent">
                     </md-slider>
                 </div>
                 <div layout>
                     <div flex="10" layout layout-align="center center">
                         <span class="md-body-1">B</span>
                     </div>
-                    <md-slider flex ng-model="color.blue" min="0" max="255" aria-label="Blue Slider" class="md-primary">
+                    <md-slider flex ng-model="color.blue" ng-change="sendColor(color.red, color.green, color.blue)" min="0" max="255" aria-label="Blue Slider" class="md-primary">
                     </md-slider>
                 </div>
             </md-card-content>
@@ -56,13 +56,13 @@
         <md-card flex>
             <md-card-content>
                 <h2 class="md-title">Options</h2>
-                <md-switch ng-model="options.flash" aria-label="Flash LEDs">
+                <md-switch ng-model="options.flash" aria-label="Flash LEDs" ng-change="sendCommand('FLASH', options.flash)">
                     Flash
                 </md-switch>
-                <md-switch ng-model="options.fade" aria-label="Fade LEDs">
+                <md-switch ng-model="options.fade" aria-label="Fade LEDs" ng-change="sendCommand('FADE', options.fade)">
                     Fade
                 </md-switch>
-                <md-switch ng-model="options.strobe" aria-label="Strobe LEDs">
+                <md-switch ng-model="options.strobe" aria-label="Strobe LEDs" ng-change="sendCommand('STROBE', options.strobe)">
                     Strobe
                 </md-switch>
             </md-card-content>
@@ -73,8 +73,7 @@
             <md-card-content>
                 <h2 class="md-title">Statistics</h2>
                 <md-list>
-                    <md-list-item class="md-3-line" ng-repeat="message in messages track by $index">
-                        {{message}}
+                    <md-list-item class="md-3-line">
                     </md-list-item>
                 </md-list>
             </md-card-content>
@@ -85,7 +84,7 @@
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-aria.min.js"></script>
-<script src="bower_components/ng-websocket/ng-websocket.js"></script>
+<script src="bower_components/angular-websocket/angular-websocket.min.js"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.js"></script>
 <script src="js/app.js"></script>
