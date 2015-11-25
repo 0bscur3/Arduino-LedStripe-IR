@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-var device = "/dev/pts/9"
+var device = "/dev/pts/10"
 
 /* Commandlist:
 - color:(r,g,b)
