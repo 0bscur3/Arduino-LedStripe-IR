@@ -1,10 +1,10 @@
 var app = angular.module('LedServer', ['ngMaterial', 'ngWebSocket']);
 
-app.config(function($mdThemingProvider) {
+app.config(['$mdThemingProvider', function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
         .primaryPalette('blue')
         .accentPalette('blue');
-});
+}]);
 
 app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
 
