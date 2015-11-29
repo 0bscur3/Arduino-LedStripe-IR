@@ -10,6 +10,12 @@ unsigned char Red = 0;
 unsigned char Green = 0;
 unsigned char Blue = 0;
 
+//global state var, 0 = color, 1 = flash up, 2 = flash down, 3 = fade
+unsigned char State = 0;
+unsigned char Flash = 0;
+unsigned char Fade = 0;
+
+
 //setting up the infrared receiver
 int RECV_PIN = 2;
 IRrecv irrecv(RECV_PIN);
@@ -41,6 +47,70 @@ void loop() {
     inputString = "";
     stringComplete = false;
   }
+
+  //flash up
+  if(State == 1){
+    if(Flash < 255){
+      analogWrite(REDPIN, ++Flash);
+      analogWrite(GREENPIN, Flash);
+      analogWrite(BLUEPIN, Flash);
+
+      delay(10);
+    }else if(Flash == 255){
+      State = 2;
+    }
+  }else if(State == 2){
+    if(Flash >= 1){
+      analogWrite(REDPIN, --Flash);
+      analogWrite(GREENPIN, Flash);
+      analogWrite(BLUEPIN, Flash);
+
+      delay(10);
+    }else if(Flash == 0){
+      State = 1;
+    }
+  //fade
+  }else if(State == 3){
+    //blue to violet
+    if(Fade == 0){
+      analogWrite(REDPIN,Red++);
+      if(Red == 256){
+        Fade = 1;
+      }
+    //violet to red
+    }else if(Fade == 1){
+      analogWrite(BLUEPIN,Blue--);
+      if(Blue == 0){
+        Fade = 2;
+      }
+    //red to yellow
+    }else if(Fade == 2){
+      analogWrite(GREENPIN,Green++);
+      if(Green == 256){
+        Fade = 3;
+      }
+    //yellow to green
+    }else if(Fade == 3){
+      analogWrite(REDPIN,Red--);
+      if(Red == 0){
+        Fade = 4;
+      }
+    //green to teal
+    }else if(Fade == 4){
+      analogWrite(BLUEPIN,Blue++);
+      if(Blue == 256){
+        Fade = 5;
+      }
+    //teal to blue
+    }else if(Fade == 5){
+      analogWrite(GREENPIN,Green--);
+      if(Green == 0){
+        Fade = 0;
+      }
+    }
+
+    delay(10);
+  }
 }
 
 /**
@@ -48,6 +118,7 @@ void loop() {
  */
 void CHECK_IR(){
   while(irrecv.decode(&results)){
+    State = 0;
     Serial.println(results.value, DEC);
     decode_Remote(results.value);
     irrecv.resume();
@@ -69,6 +140,21 @@ void decode_Serial(String cmd){
     int blue = cmd.substring(end_g+1,end_b).toInt();
 
     setColor(red, green, blue);
+  }else if(cmd.startsWith("cmd:",0)){
+    int start = cmd.indexOf(":");
+    int end = cmd.length();
+
+    String command = cmd.substring(start, end);
+
+    if(command.equals("POWER_ON")){
+      powerOn();
+    }else if(command.equals("POWER_OFF")){
+      powerOff();
+    }else if(command.equals("FADE")){
+      fade();
+    }else if(command.equals("FLASH")){
+      flash();
+    }
   }
 }
 
@@ -80,15 +166,13 @@ void decode_Remote(unsigned long code){
 
       //POWER ON
       case 3457774333:
-        Serial.println("cmd:POWER_ON");
-        setColor(255,255,255);   
+        powerOn();  
         break;
 
       //POWER OFF
       case 3571254145:
       case 16203967:
-        Serial.println("cmd:POWER_OFF");
-        setColor(0,0,0);   
+        powerOff(); 
         break;
 
       //RED
@@ -126,6 +210,14 @@ void decode_Remote(unsigned long code){
       case 2231595101: 
         increaseBrightness();
         break;
+
+      //FLASH
+      case 16240687:
+        flash();
+        break;
+
+      //fade
+      //TODO
     }
 }
 
@@ -142,6 +234,7 @@ void setColor(unsigned char red, unsigned char green, unsigned char blue){
   Red = red;
   Green = green;
   Blue = blue;
+  State = 0;
 
   printColor();
 }
@@ -210,6 +303,40 @@ void printColor(){
   Serial.print(",");
   Serial.print(Blue);
   Serial.println(")");
+}
+
+/**
+ * power on
+ */
+void powerOn(){
+  Serial.println("cmd:POWER_ON");
+  setColor(255,255,255); 
+}
+
+/**
+ * power off
+ */
+void powerOff(){
+  Serial.println("cmd:POWER_OFF");
+  setColor(0,0,0);  
+}
+
+/**
+ * flash
+ */
+void flash(){
+  Serial.println("cmd:FLASH");
+  State = 1;
+}
+
+/**
+ * fade
+ */
+void fade(){
+  Serial.println("cmd:FADE");
+  State = 3;
+  Fade = 0;
+  setColor(0,0,255);  
 }
 
 /*
