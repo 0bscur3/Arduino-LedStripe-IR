@@ -19,7 +19,7 @@ var device string;
 
 func Serve(webWriter chan<- string, webReader <-chan string, done chan bool) {
 
-	device := os.Args[1]
+	device = os.Args[1]
 	log.Println("# Starting Serial Listener on", device)
 
 	c := &serial.Config{Name: device, Baud: 9600}
