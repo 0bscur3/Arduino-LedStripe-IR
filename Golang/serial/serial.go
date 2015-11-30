@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-var device = "/dev/pts/10"
+var device = "/dev/ttyUSB0"
 
 /* Commandlist:
 - color:(r,g,b)

@@ -119,7 +119,7 @@ void loop() {
 void CHECK_IR(){
   while(irrecv.decode(&results)){
     State = 0;
-    Serial.println(results.value, DEC);
+    //Serial.println(results.value, DEC);
     decode_Remote(results.value);
     irrecv.resume();
   }
