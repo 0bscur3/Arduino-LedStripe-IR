@@ -41,7 +41,7 @@ void loop() {
  serialEvent(); //call the function
   // print the string when a newline arrives:
   if (stringComplete) {
-    Serial.println(inputString);
+    //Serial.println(inputString);
     decode_Serial(inputString);
     // clear the string:
     inputString = "";
@@ -74,7 +74,7 @@ void loop() {
     //blue to violet
     if(Fade == 0){
       analogWrite(REDPIN,Red++);
-      if(Red == 256){
+      if(Red == 255){
         Fade = 1;
       }
     //violet to red
@@ -86,7 +86,7 @@ void loop() {
     //red to yellow
     }else if(Fade == 2){
       analogWrite(GREENPIN,Green++);
-      if(Green == 256){
+      if(Green == 255){
         Fade = 3;
       }
     //yellow to green
@@ -98,7 +98,7 @@ void loop() {
     //green to teal
     }else if(Fade == 4){
       analogWrite(BLUEPIN,Blue++);
-      if(Blue == 256){
+      if(Blue == 255){
         Fade = 5;
       }
     //teal to blue
@@ -141,18 +141,18 @@ void decode_Serial(String cmd){
 
     setColor(red, green, blue);
   }else if(cmd.startsWith("cmd:",0)){
-    int start = cmd.indexOf(":");
-    int end = cmd.length();
+    int start = cmd.indexOf(":")+1;
+    int end = cmd.length()-1;
 
     String command = cmd.substring(start, end);
-
-    if(command.equals("POWER_ON")){
+   
+    if(command == "POWER_ON"){
       powerOn();
-    }else if(command.equals("POWER_OFF")){
+    }else if(command == "POWER_OFF"){
       powerOff();
-    }else if(command.equals("FADE")){
+    }else if(command == "FADE"){
       fade();
-    }else if(command.equals("FLASH")){
+    }else if(command == "FLASH"){
       flash();
     }
   }
@@ -166,6 +166,7 @@ void decode_Remote(unsigned long code){
 
       //POWER ON
       case 3457774333:
+      case 16236607:
         powerOn();  
         break;
 
@@ -216,8 +217,10 @@ void decode_Remote(unsigned long code){
         flash();
         break;
 
-      //fade
-      //TODO
+      //FADE
+      case 16238647:
+        fade();
+        break;
     }
 }
 
@@ -302,14 +305,14 @@ void printColor(){
   Serial.print(Green);
   Serial.print(",");
   Serial.print(Blue);
-  Serial.println(")");
+  Serial.println(");");
 }
 
 /**
  * power on
  */
 void powerOn(){
-  Serial.println("cmd:POWER_ON");
+  Serial.println("cmd:POWER_ON;");
   setColor(255,255,255); 
 }
 
@@ -317,7 +320,7 @@ void powerOn(){
  * power off
  */
 void powerOff(){
-  Serial.println("cmd:POWER_OFF");
+  Serial.println("cmd:POWER_OFF;");
   setColor(0,0,0);  
 }
 
@@ -325,7 +328,7 @@ void powerOff(){
  * flash
  */
 void flash(){
-  Serial.println("cmd:FLASH");
+  Serial.println("cmd:FLASH;");
   State = 1;
 }
 
@@ -333,10 +336,11 @@ void flash(){
  * fade
  */
 void fade(){
-  Serial.println("cmd:FADE");
   State = 3;
   Fade = 0;
-  setColor(0,0,255);  
+  Blue = 255;
+  analogWrite(BLUEPIN, Blue);
+  Serial.println("cmd:FADE;");
 }
 
 /*
