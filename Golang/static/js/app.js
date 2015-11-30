@@ -12,7 +12,7 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
 
     ws.onMessage(function(message) {
         var data = JSON.parse(message.data);
-
+        console.log(data);
         if (data.event === "cmd") {
             handleCommand(data.data);
         } else if (data.event === "color") {
@@ -23,30 +23,28 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
 
     function handleCommand (command) {
 
-        var valid = false;
+        var validCommands = ['POWER_ON', 'POWER_OFF', 'FADE', 'FLASH'];
         var value = 0;
 
-        if (command.slice(-2) === "ON") {
-            valid = true;
-            value = true;
-        } else if (command.slice(-3) === "OFF") {
-            valid = true;
-            value = false;
+        if(validCommands.indexOf(command) < 0){
+            return;
         }
 
-        if (!valid) {
-            return;
+        if (command.slice(-2) === "ON") {
+            value = true;
+        } else if (command.slice(-3) === "OFF") {
+            value = false;
         }
 
         var parts = command.split("_");
         var option = parts[0];
 
         if (option === "FADE") {
-            $scope.options.fade = value;
+            $scope.options.fade = !$scope.options.fade;
         } else if (option === "FLASH") {
-            $scope.options.flash = value;
-        } else if (option === "STROBE") {
-            $scope.options.strobe = value;
+            $scope.options.flash = !$scope.options.flash;
+        } else if (option === "POWER") {
+            $scope.status.power = value;
         }
 
 
@@ -58,10 +56,13 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
         $scope.color.blue = colors[2];
     }
 
+    $scope.status = {
+        power: false
+    };
+
     $scope.options = {
-        fade: true,
-        flash: true,
-        strobe: true
+        fade: false,
+        flash: false
     };
 
     $scope.color = {
@@ -80,8 +81,16 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
         ws.send({event:'color', data:[red, green, blue]});
     };
 
-    $scope.sendCommand = function(command, value) {
+    $scope.sendPower = function(value) {
+        if (value === true) {
+            $scope.sendCommand('POWER_ON');
+        } else {
+            $scope.sendCommand('POWER_OFF');
+        }
+    };
 
+    $scope.sendCommand = function(command) {
+/*
         command += "_";
         console.log(value);
 
@@ -89,7 +98,7 @@ app.controller('AppCtrl', ['$scope', '$websocket', function($scope, $websocket){
             command += "ON";
         } else {
             command += "OFF";
-        }
+        }*/
 
         ws.send({
             event:'cmd',

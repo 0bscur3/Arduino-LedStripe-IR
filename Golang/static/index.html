@@ -16,7 +16,7 @@
         <md-card flex>
             <md-card-content>
                 <h2 class="md-title">Status</h2>
-                <md-switch ng-model="status.power" aria-label="Flash LEDs">
+                <md-switch ng-model="status.power" aria-label="Power LEDs" ng-change="sendPower(status.power)">
                     Power On
                 </md-switch>
             </md-card-content>
@@ -61,9 +61,6 @@
                 </md-switch>
                 <md-switch ng-model="options.fade" aria-label="Fade LEDs" ng-change="sendCommand('FADE', options.fade)">
                     Fade
-                </md-switch>
-                <md-switch ng-model="options.strobe" aria-label="Strobe LEDs" ng-change="sendCommand('STROBE', options.strobe)">
-                    Strobe
                 </md-switch>
             </md-card-content>
         </md-card>

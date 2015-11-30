@@ -120,7 +120,6 @@ func (s *Socket) readSocket() {
 			log.Println("! Error during read:", err)
 			break
 		}
-
 		message := parseIncoming(payload)
 		log.Println(message)
 		s.read <- message
