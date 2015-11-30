@@ -3,9 +3,10 @@ package serial
 import (
 	"github.com/tarm/serial"
 	"log"
+	"os"
 )
 
-var device = "/dev/ttyUSB0"
+var device string;
 
 /* Commandlist:
 - color:(r,g,b)
@@ -17,6 +18,8 @@ var device = "/dev/ttyUSB0"
 */
 
 func Serve(webWriter chan<- string, webReader <-chan string, done chan bool) {
+
+	device := os.Args[1]
 	log.Println("# Starting Serial Listener on", device)
 
 	c := &serial.Config{Name: device, Baud: 9600}
